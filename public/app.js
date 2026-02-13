@@ -381,7 +381,7 @@ function renderDropDashboard(container, { drop, messages, views }) {
   container.querySelectorAll("[data-delete]").forEach((btn) => {
     btn.addEventListener("click", async () => {
       if (!confirm("Delete this message?")) return;
-      const { ok } = await api(`/api/drops/messages/${btn.dataset.delete}`, {
+      const { ok } = await api(`/api/drops/messages?id=${btn.dataset.delete}`, {
         method: "DELETE",
       });
       if (ok) renderDashboard();

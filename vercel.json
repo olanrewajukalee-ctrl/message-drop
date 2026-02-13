@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/api/register", "destination": "/api/register" },
+    { "source": "/api/login", "destination": "/api/login" },
+    { "source": "/api/logout", "destination": "/api/logout" },
+    { "source": "/api/me", "destination": "/api/me" },
+    { "source": "/api/init-db", "destination": "/api/init-db" },
+    { "source": "/api/drops/mine", "destination": "/api/drops-mine" },
+    { "source": "/api/drops/messages", "destination": "/api/drops-messages" },
+    { "source": "/api/drops", "destination": "/api/drops" },
+    {
+      "source": "/api/drop/:username/autocomplete",
+      "destination": "/api/drop/:username/autocomplete"
+    },
+    {
+      "source": "/api/drop/:username/check",
+      "destination": "/api/drop/:username/check"
+    },
+    { "source": "/api/drop/:username", "destination": "/api/drop/:username" },
+    { "source": "/((?!api/).*)", "destination": "/public/index.html" }
+  ]
+}
