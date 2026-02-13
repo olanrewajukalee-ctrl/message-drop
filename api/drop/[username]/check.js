@@ -1,5 +1,6 @@
 const { pool } = require("../../../lib/db");
 const { comparePassword } = require("../../../lib/auth");
+const url = require("url");
 
 module.exports = async (req, res) => {
   if (req.method === "OPTIONS") return res.status(200).end();
@@ -7,7 +8,13 @@ module.exports = async (req, res) => {
     return res.status(405).json({ error: "Method not allowed" });
 
   try {
-    const { username } = req.query;
+    let username = req.query.username;
+    if (!username) {
+      const parsed = url.parse(req.url, true);
+      const parts = parsed.pathname.split("/").filter(Boolean);
+      // URL is /api/drop/USERNAME/check
+      if (parts.length >= 3) username = decodeURIComponent(parts[2]);
+    }
     const { nickname, passcode } = req.body;
 
     if (!username) return res.status(400).json({ error: "Username required" });

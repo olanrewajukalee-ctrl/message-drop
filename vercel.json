@@ -11,13 +11,13 @@
     { "source": "/api/drops", "destination": "/api/drops" },
     {
       "source": "/api/drop/:username/autocomplete",
-      "destination": "/api/drop/:username/autocomplete"
+      "destination": "/api/drop/[username]/autocomplete"
     },
     {
       "source": "/api/drop/:username/check",
-      "destination": "/api/drop/:username/check"
+      "destination": "/api/drop/[username]/check"
     },
-    { "source": "/api/drop/:username", "destination": "/api/drop/:username" },
-    { "source": "/:path*", "destination": "/index.html" }
+    { "source": "/api/drop/:username", "destination": "/api/drop/[username]" },
+    { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }
