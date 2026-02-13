@@ -1,23 +1,24 @@
 {
   "version": 2,
-  "rewrites": [
-    { "source": "/api/register", "destination": "/api/register" },
-    { "source": "/api/login", "destination": "/api/login" },
-    { "source": "/api/logout", "destination": "/api/logout" },
-    { "source": "/api/me", "destination": "/api/me" },
-    { "source": "/api/init-db", "destination": "/api/init-db" },
-    { "source": "/api/drops/mine", "destination": "/api/drops-mine" },
-    { "source": "/api/drops/messages", "destination": "/api/drops-messages" },
-    { "source": "/api/drops", "destination": "/api/drops" },
+  "builds": [
+    { "src": "api/**/*.js", "use": "@vercel/node" },
+    { "src": "public/**/*", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/register", "dest": "/api/register" },
+    { "src": "/api/login", "dest": "/api/login" },
+    { "src": "/api/logout", "dest": "/api/logout" },
+    { "src": "/api/me", "dest": "/api/me" },
+    { "src": "/api/init-db", "dest": "/api/init-db" },
+    { "src": "/api/drops/mine", "dest": "/api/drops-mine" },
+    { "src": "/api/drops/messages", "dest": "/api/drops-messages" },
+    { "src": "/api/drops", "dest": "/api/drops" },
     {
-      "source": "/api/drop/:username/autocomplete",
-      "destination": "/api/drop/:username/autocomplete"
+      "src": "/api/drop/(.*)/autocomplete",
+      "dest": "/api/drop/[username]/autocomplete"
     },
-    {
-      "source": "/api/drop/:username/check",
-      "destination": "/api/drop/:username/check"
-    },
-    { "source": "/api/drop/:username", "destination": "/api/drop/:username" },
-    { "source": "/((?!api/).*)", "destination": "/public/index.html" }
+    { "src": "/api/drop/(.*)/check", "dest": "/api/drop/[username]/check" },
+    { "src": "/api/drop/(.*)", "dest": "/api/drop/[username]" },
+    { "src": "/(.*)", "dest": "/public/$1" }
   ]
 }
