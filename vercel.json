@@ -18,6 +18,6 @@
       "destination": "/api/drop/:username/check"
     },
     { "source": "/api/drop/:username", "destination": "/api/drop/:username" },
-    { "source": "/:path*", "destination": "/public/index.html" }
+    { "source": "/:path*", "destination": "/index.html" }
   ]
 }
