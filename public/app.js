@@ -473,7 +473,7 @@ async function renderReceiverPage(username) {
                   <div class="form-group">
                     <label id="questionLabel">Answer the question</label>
                     <div id="questionHint" style="font-size:0.85rem; color:#8b5cf6; margin-bottom:8px;"></div>
-                    <input type="text" id="checkPasscode" placeholder="Your answer..." maxlength="50" required />
+                    <input type="text" id="checkPasscode" placeholder="Your answer..." maxlength="50" />
                   </div>
                 </div>
                 <div id="checkError" class="error-text" style="display:none;"></div>

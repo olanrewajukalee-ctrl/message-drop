@@ -27,12 +27,18 @@ module.exports = async (req, res) => {
        JOIN drops d ON m.drop_id = d.id
        JOIN users u ON d.user_id = u.id
        WHERE LOWER(u.username) = LOWER($1)
-         AND LOWER(m.nickname) = LOWER($2)`,
-      [username, nickname.trim()],
+         AND LOWER(TRIM(m.nickname)) = LOWER(TRIM($2))`,
+      [username, nickname],
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: "No message found for that name" });
+      console.log(
+        "No message found for username:",
+        username,
+        "nickname:",
+        nickname,
+      );
+      return res.status(404).json({ error: "No message found for that key" });
     }
 
     const msg = result.rows[0];
