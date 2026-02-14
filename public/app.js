@@ -487,6 +487,10 @@ async function renderReceiverPage(username) {
       `
           : ""
       }
+
+      <div class="cta-section">
+        <button class="btn btn-secondary cta-btn" onclick="navigate('/register')">Create a message like this for friends and family</button>
+      </div>
     </div>
   `;
 
