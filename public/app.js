@@ -75,7 +75,7 @@ function renderLanding() {
     <div class="auth-page">
       <div class="page-header">
         <h1>Message Drop</h1>
-        <p class="subtitle">Drop secret messages unlocked by a nickname & riddle</p>
+        <p class="subtitle">Drop secret messages to friends they can unlock by their name or number</p>
       </div>
       <div class="card" style="text-align:center;">
         <h2>Create your message drop</h2>
@@ -234,11 +234,11 @@ function renderDropDashboard(container, { drop, messages, views }) {
         <h3>Add Personalized Message</h3>
         <form id="addMsgForm" style="margin-top:12px;">
           <div class="form-group">
-            <label>Recipient Nickname</label>
-            <input type="text" id="msgNickname" placeholder="e.g. Sunshine" maxlength="100" required />
+            <label>Receiver Unlock Key</label>
+            <input type="text" id="msgNickname" placeholder="e.g. Sunshine, 1234, any key" required />
           </div>
           <div class="form-group">
-            <label>Riddle / Question</label>
+            <label>Secret Question</label>
             <input type="text" id="msgQuestion" placeholder="e.g. What do I call you when we're being lazy?" maxlength="200" required />
           </div>
           <div class="form-group">
@@ -458,19 +458,16 @@ async function renderReceiverPage(username) {
         <div class="inbox-section">
           <div class="inbox-toggle" id="inboxToggle">
             <h3>Check my inbox</h3>
-            <p>See if there's a personal message just for you</p>
+            <p>See if there's a personal message just for me</p>
           </div>
 
           <div id="inboxForm" style="display:none; margin-top:20px;">
             <div class="card">
-              <h3>Find your message</h3>
+              <h3>Reveal my message</h3>
               <form id="checkForm" style="margin-top:16px;">
                 <div class="form-group">
-                  <label>Your Name / Nickname</label>
-                  <div class="autocomplete-wrapper">
-                    <input type="text" id="checkNickname" placeholder="Start typing your name..." maxlength="100" autocomplete="off" required />
-                    <div id="autocompleteDropdown" class="autocomplete-dropdown" style="display:none;"></div>
-                  </div>
+                  <label>Enter unlock key</label>
+                  <input type="text" id="checkNickname" placeholder="Enter your unlock key..." autocomplete="off" required />
                 </div>
                 <div id="questionArea" style="display:none;">
                   <div class="form-group">
@@ -501,78 +498,9 @@ async function renderReceiverPage(username) {
     document.getElementById("inboxForm").style.display = "block";
   });
 
-  // Autocomplete
+  // Autocomplete disabled for now
   const nicknameInput = document.getElementById("checkNickname");
-  const dropdown = document.getElementById("autocompleteDropdown");
-  let debounceTimer;
-
-  nicknameInput.addEventListener("input", () => {
-    clearTimeout(debounceTimer);
-    const val = nicknameInput.value.trim();
-
-    if (val.length < 4) {
-      dropdown.style.display = "none";
-      return;
-    }
-
-    debounceTimer = setTimeout(async () => {
-      const { ok, data: suggestions } = await api(
-        `/api/drop/${encodeURIComponent(username)}/autocomplete?q=${encodeURIComponent(val)}`,
-      );
-
-      if (ok && suggestions.length > 0) {
-        dropdown.innerHTML = suggestions
-          .map(
-            (s) =>
-              `<div class="autocomplete-item" data-name="${esc(s)}">${esc(s)}</div>`,
-          )
-          .join("");
-        dropdown.style.display = "block";
-
-        dropdown.querySelectorAll(".autocomplete-item").forEach((item) => {
-          item.addEventListener("click", () => {
-            nicknameInput.value = item.dataset.name;
-            dropdown.style.display = "none";
-            fetchQuestion(username, item.dataset.name);
-          });
-        });
-      } else {
-        dropdown.style.display = "none";
-      }
-    }, 250);
-  });
-
-  // Hide dropdown on outside click
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".autocomplete-wrapper")) {
-      dropdown.style.display = "none";
-    }
-  });
-
-  // Fetch question when nickname is confirmed
-  async function fetchQuestion(user, nickname) {
-    const { ok, data: result } = await api(
-      `/api/drop/${encodeURIComponent(user)}/check`,
-      {
-        method: "POST",
-        body: { nickname, passcode: "__probe__" },
-      },
-    );
-
-    const questionArea = document.getElementById("questionArea");
-    if (ok && result.found) {
-      document.getElementById("questionLabel").textContent = result.question;
-      if (result.hint) {
-        document.getElementById("questionHint").textContent =
-          `Hint: ${result.hint}`;
-      }
-      questionArea.style.display = "block";
-    } else if (!ok && result.error) {
-      document.getElementById("checkError").textContent = result.error;
-      document.getElementById("checkError").style.display = "block";
-      questionArea.style.display = "none";
-    }
-  }
+  let questionRevealed = false;
 
   // Submit check
   document.getElementById("checkForm").addEventListener("submit", async (e) => {
@@ -581,9 +509,38 @@ async function renderReceiverPage(username) {
     errEl.style.display = "none";
 
     const nickname = nicknameInput.value.trim();
-    const passcode = document.getElementById("checkPasscode").value.trim();
+    if (!nickname) return;
 
-    if (!nickname || !passcode) return;
+    // Step 1: Enter unlock key → fetch question
+    if (!questionRevealed) {
+      const { ok, data: result } = await api(
+        `/api/drop/${encodeURIComponent(username)}/check`,
+        {
+          method: "POST",
+          body: { nickname, passcode: "__probe__" },
+        },
+      );
+
+      const questionArea = document.getElementById("questionArea");
+      if (ok && result.found) {
+        document.getElementById("questionLabel").textContent = result.question;
+        if (result.hint) {
+          document.getElementById("questionHint").textContent =
+            `Hint: ${result.hint}`;
+        }
+        questionArea.style.display = "block";
+        nicknameInput.readOnly = true;
+        questionRevealed = true;
+      } else {
+        errEl.textContent = result.error || "No message found for that key";
+        errEl.style.display = "block";
+      }
+      return;
+    }
+
+    // Step 2: Answer question → unlock message
+    const passcode = document.getElementById("checkPasscode").value.trim();
+    if (!passcode) return;
 
     const { ok, data: result } = await api(
       `/api/drop/${encodeURIComponent(username)}/check`,
